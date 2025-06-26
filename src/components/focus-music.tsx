@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useActionState, useState } from 'react';
 import { getMusicRecommendationsAction } from '@/app/actions';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -14,17 +13,8 @@ const initialState = {
 };
 
 export function FocusMusic() {
-  const [state, formAction] = useFormState(getMusicRecommendationsAction, initialState);
+  const [state, formAction, isPending] = useActionState(getMusicRecommendationsAction, initialState);
   const [preferences, setPreferences] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-    const formData = new FormData(event.currentTarget);
-    await formAction(formData);
-    setIsSubmitting(false);
-  };
   
   return (
     <Card>
@@ -33,7 +23,7 @@ export function FocusMusic() {
         <CardDescription>Get AI-powered music recommendations for your work session.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <Textarea
             name="musicPreferences"
             placeholder="e.g., 'calm instrumental piano', 'lo-fi beats', 'epic orchestral scores for coding'"
@@ -43,8 +33,8 @@ export function FocusMusic() {
             required
             className="text-base"
           />
-          <Button type="submit" disabled={isSubmitting || !preferences.trim()}>
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+          <Button type="submit" disabled={isPending || !preferences.trim()}>
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             Get Recommendations
           </Button>
         </form>
