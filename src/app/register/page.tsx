@@ -1,11 +1,24 @@
+'use client';
+
 import { Flower2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, you'd create a user here.
+    // For now, we'll simulate a successful registration and login.
+    localStorage.setItem('isLoggedIn', 'true');
+    router.push('/');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 md:p-8">
        <header className="flex items-center justify-center text-center mb-12">
@@ -20,7 +33,7 @@ export default function RegisterPage() {
           <CardDescription className="text-center">Join us and start focusing in style!</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <form className="grid gap-4">
+          <form className="grid gap-4" onSubmit={handleRegister}>
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" placeholder="Your Name" required />

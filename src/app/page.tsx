@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/header';
 import { PomodoroTimer } from '@/components/pomodoro-timer';
 import { TaskManager } from '@/components/task-manager';
 import { FocusMusic } from '@/components/focus-music';
 import { useNotifications } from '@/hooks/use-notifications';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ListTodo, Music, Settings } from 'lucide-react';
+import { ListTodo, Music, Settings, LogOut, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -29,13 +30,32 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
 
   const { requestPermission, sendNotification, playSound } = useNotifications('/alarm.mp3');
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    requestPermission();
-  }, [requestPermission]);
+    // localStorage is only available on the client side.
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+      router.replace('/login');
+    } else {
+      setIsLoading(false);
+    }
+  }, [router]);
 
-  // Load state from localStorage on initial client-side render
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    router.push('/login');
+  };
+
   useEffect(() => {
+    if (!isLoading) {
+      requestPermission();
+    }
+  }, [requestPermission, isLoading]);
+
+  useEffect(() => {
+    if (isLoading) return; // Don't run localStorage effects until authenticated
     const savedTasks = localStorage.getItem('tomato-time-tasks');
     if (savedTasks) {
       try {
@@ -57,15 +77,14 @@ export default function Home() {
     }
     
     setIsMounted(true);
-  }, []);
+  }, [isLoading]);
 
-  // Save state to localStorage whenever tasks change
   useEffect(() => {
-    if (isMounted) {
+    if (isMounted && !isLoading) {
       localStorage.setItem('tomato-time-tasks', JSON.stringify(tasks));
       localStorage.setItem('tomato-time-completed-tasks', JSON.stringify(completedTasks));
     }
-  }, [tasks, completedTasks, isMounted]);
+  }, [tasks, completedTasks, isMounted, isLoading]);
 
   const handleTimerComplete = useCallback(() => {
     playSound();
@@ -107,10 +126,24 @@ export default function Home() {
   const handleSettingsSave = () => {
     resetCycle();
   }
+  
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 md:p-8 font-body">
-      <Header />
+    <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4 md:p-8 font-body">
+      <div className="w-full max-w-md relative flex items-center justify-center">
+        <Header />
+        <Button onClick={handleLogout} variant="ghost" size="icon" className="absolute top-1/2 -translate-y-1/2 right-0">
+          <LogOut className="h-6 w-6" />
+          <span className="sr-only">Logout</span>
+        </Button>
+      </div>
       <main className="w-full max-w-md mx-auto mt-8">
         <Card className="bg-card/90 backdrop-blur-sm border-border/50 shadow-lg shadow-primary/20">
           <CardContent className="p-4 md:p-6">
