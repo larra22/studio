@@ -26,12 +26,47 @@ export default function Home() {
   const [longBreakInterval, setLongBreakInterval] = useState(4);
   const [task, setTask] = useState<string>('');
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   const { requestPermission, sendNotification, playSound } = useNotifications('/alarm.mp3');
 
   useEffect(() => {
     requestPermission();
   }, [requestPermission]);
+
+  // Load state from localStorage on initial client-side render
+  useEffect(() => {
+    const savedTask = localStorage.getItem('tomato-time-task');
+    if (savedTask) {
+      setTask(savedTask);
+    }
+    const savedCompletedTasks = localStorage.getItem('tomato-time-completed-tasks');
+    if (savedCompletedTasks) {
+      try {
+        const parsedTasks = JSON.parse(savedCompletedTasks);
+        if (Array.isArray(parsedTasks)) {
+          setCompletedTasks(parsedTasks);
+        }
+      } catch (e) {
+        console.error("Failed to parse completed tasks from localStorage", e);
+      }
+    }
+    setIsMounted(true);
+  }, []);
+
+  // Save task to localStorage whenever it changes, after initial mount
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('tomato-time-task', task);
+    }
+  }, [task, isMounted]);
+
+  // Save completed tasks to localStorage whenever they change, after initial mount
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('tomato-time-completed-tasks', JSON.stringify(completedTasks));
+    }
+  }, [completedTasks, isMounted]);
 
   const handleTimerComplete = useCallback(() => {
     playSound();
