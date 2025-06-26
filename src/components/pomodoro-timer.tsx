@@ -62,22 +62,22 @@ export function PomodoroTimer({ minutes, mode, onComplete, onReset }: PomodoroTi
   const progress = ((totalSeconds - secondsLeft) / totalSeconds) * 100;
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 rounded-lg space-y-6">
+    <div className="flex flex-col items-center justify-center p-8 rounded-lg space-y-8">
       <div className="text-center">
-        <p className="text-2xl font-semibold text-accent">{getModeText()}</p>
-        <p className="text-8xl md:text-9xl font-bold font-headline tabular-nums text-primary tracking-tighter">
+        <p className="text-lg font-semibold text-muted-foreground tracking-widest uppercase">{getModeText()}</p>
+        <p className="text-8xl md:text-9xl font-bold font-headline tabular-nums text-foreground tracking-normal">
           {formatTime(secondsLeft)}
         </p>
       </div>
       
-      <Progress value={progress} className="w-full h-3" />
+      <Progress value={progress} className="w-full h-2" />
 
       <div className="flex space-x-4">
-        <Button onClick={toggleTimer} size="lg" className="w-36" variant={isActive ? 'secondary' : 'default'} disabled={secondsLeft === 0}>
+        <Button onClick={toggleTimer} size="lg" className="w-36 rounded-full shadow-lg" variant={isActive ? 'secondary' : 'default'} disabled={secondsLeft === 0}>
           {isActive ? <Pause className="mr-2"/> : <Play className="mr-2"/>}
           {isActive ? 'Pause' : 'Start'}
         </Button>
-        <Button onClick={onReset} size="lg" variant="outline">
+        <Button onClick={onReset} size="lg" variant="outline" className="rounded-full shadow-lg">
             <RotateCcw className="mr-2"/>
             Reset
         </Button>

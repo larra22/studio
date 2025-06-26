@@ -112,7 +112,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 md:p-8 font-body">
       <Header />
       <main className="w-full max-w-md mx-auto mt-8">
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 shadow-xl shadow-primary/10">
+        <Card className="bg-card/90 backdrop-blur-sm border-border/50 shadow-lg shadow-primary/20">
           <CardContent className="p-4 md:p-6">
             <PomodoroTimer
               key={key}
@@ -126,7 +126,7 @@ export default function Home() {
         
         <div className="mt-8">
           <Tabs defaultValue="tasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-card/80 border border-primary/20">
+            <TabsList className="grid w-full grid-cols-3 bg-muted">
               <TabsTrigger value="tasks" className="gap-1"><ListTodo className="h-4 w-4" />Tasks</TabsTrigger>
               <TabsTrigger value="music" className="gap-1"><Music className="h-4 w-4" />Music</TabsTrigger>
               <TabsTrigger value="settings" className="gap-1"><Settings className="h-4 w-4" />Settings</TabsTrigger>
