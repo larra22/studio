@@ -24,7 +24,7 @@ export default function Home() {
   const [shortBreakMinutes, setShortBreakMinutes] = useState(5);
   const [longBreakMinutes, setLongBreakMinutes] = useState(15);
   const [longBreakInterval, setLongBreakInterval] = useState(4);
-  const [task, setTask] = useState<string>('');
+  const [tasks, setTasks] = useState<string[]>([]);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -36,37 +36,36 @@ export default function Home() {
 
   // Load state from localStorage on initial client-side render
   useEffect(() => {
-    const savedTask = localStorage.getItem('tomato-time-task');
-    if (savedTask) {
-      setTask(savedTask);
+    const savedTasks = localStorage.getItem('tomato-time-tasks');
+    if (savedTasks) {
+      try {
+        const parsed = JSON.parse(savedTasks);
+        if (Array.isArray(parsed)) setTasks(parsed);
+      } catch (e) {
+        console.error("Failed to parse tasks from localStorage", e);
+      }
     }
+    
     const savedCompletedTasks = localStorage.getItem('tomato-time-completed-tasks');
     if (savedCompletedTasks) {
       try {
-        const parsedTasks = JSON.parse(savedCompletedTasks);
-        if (Array.isArray(parsedTasks)) {
-          setCompletedTasks(parsedTasks);
-        }
+        const parsed = JSON.parse(savedCompletedTasks);
+        if (Array.isArray(parsed)) setCompletedTasks(parsed);
       } catch (e) {
         console.error("Failed to parse completed tasks from localStorage", e);
       }
     }
+    
     setIsMounted(true);
   }, []);
 
-  // Save task to localStorage whenever it changes, after initial mount
+  // Save state to localStorage whenever tasks change
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('tomato-time-task', task);
-    }
-  }, [task, isMounted]);
-
-  // Save completed tasks to localStorage whenever they change, after initial mount
-  useEffect(() => {
-    if (isMounted) {
+      localStorage.setItem('tomato-time-tasks', JSON.stringify(tasks));
       localStorage.setItem('tomato-time-completed-tasks', JSON.stringify(completedTasks));
     }
-  }, [completedTasks, isMounted]);
+  }, [tasks, completedTasks, isMounted]);
 
   const handleTimerComplete = useCallback(() => {
     playSound();
@@ -74,10 +73,6 @@ export default function Home() {
       sendNotification('Work session complete!', 'Time for a break.');
       const newPomodoros = pomodoros + 1;
       setPomodoros(newPomodoros);
-      if (task) {
-        setCompletedTasks(prev => [...prev, task]);
-        setTask('');
-      }
       if (newPomodoros > 0 && newPomodoros % longBreakInterval === 0) {
         setMode('longBreak');
       } else {
@@ -88,7 +83,7 @@ export default function Home() {
       setMode('work');
     }
     setKey(prevKey => prevKey + 1);
-  }, [mode, pomodoros, longBreakInterval, playSound, sendNotification, task]);
+  }, [mode, pomodoros, longBreakInterval, playSound, sendNotification]);
 
   const getMinutes = () => {
     switch (mode) {
@@ -137,7 +132,7 @@ export default function Home() {
               <TabsTrigger value="settings" className="gap-1"><Settings className="h-4 w-4" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="tasks" className="mt-4">
-              <TaskManager currentTask={task} setCurrentTask={setTask} completedTasks={completedTasks} />
+              <TaskManager tasks={tasks} setTasks={setTasks} completedTasks={completedTasks} setCompletedTasks={setCompletedTasks} />
             </TabsContent>
             <TabsContent value="music" className="mt-4">
               <FocusMusic />
